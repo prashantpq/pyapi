@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "pyapi"
+name = "pyapi-diff"
 version = "0.0.1"
 description = "python tool to indentify breaking changes in apis."
 readme = "README.md"
@@ -27,3 +27,8 @@ classifiers = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/pyapi"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
