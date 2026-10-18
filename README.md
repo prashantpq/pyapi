@@ -138,7 +138,7 @@ uv run python tests/test1.py
 
 ## Project Status
 
-`pyapi` is currently in its initial release, `0.0.1`.
+`pyapi` is currently in its initial release, `0.0.2`.
 
 The current focus is on detecting JSON structural and data type changes. Additional functionality may be introduced in future releases.
 
