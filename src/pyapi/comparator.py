@@ -90,7 +90,8 @@ def json_compare(old: dict, new: dict) -> list:
         "$",
         changes
     )
-    return changes
+
+    return changes if not len(changes) == 0 else ["Both json are identical"]
 
 
 
