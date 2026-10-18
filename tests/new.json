@@ -1,0 +1,10 @@
+{
+  "id": "101",
+  "name": "xyz",
+  "contact": 1234567890,
+  "address": {
+    "city": "Seattle",
+    "pincode": 1234
+  },
+  "skills": ["Python", "SQL"]
+}

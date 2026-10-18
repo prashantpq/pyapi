@@ -9,10 +9,8 @@ class Change:
 
     def __str__(self)-> str:
         """
-        Docstring for __str__
-
-        :param self: Description
-        :return: Description
+        This magical method will allow to represent the data in format.
+        :return: data in format
         :rtype: str
         """
         return (

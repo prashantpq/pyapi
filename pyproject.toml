@@ -1,10 +1,29 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "pyapi"
-version = "0.0.1"
-authors = [
-  { name="Prashant Sharma", email="prashant.ps9833@gmail.com"},
-]
-description = "python tool to indentify breaking changes in apis"
+version = "0.1.0"
+description = "python tool to indentify breaking changes in apis."
 readme = "README.md"
-requires-python = ">=3.13"
-dependencies = []
+requires-python = ">=3.10"
+license = "MIT"
+authors = [
+    { name = "Prashant Sharma", email="prashant.ps9833@gmail.com"}
+]
+keywords = [
+    "json",
+    "json-diff",
+    "comparison",
+    "developer-tools"
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries :: Python Modules"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pyapi"]

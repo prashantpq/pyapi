@@ -5,7 +5,7 @@ import json
 def _json_type(value):
     """
     Docstring for _json_type
-    
+
     :param value: any datatype
     :type value: Any
     :return: understandable datatype
@@ -44,7 +44,7 @@ def _compare(old: str, new: str, path: str, changes: list):
     if old_type != new_type:
         changes.append(
             Change(
-                kind= "type_changes",
+                kind= "type_changed",
                 path= path or "$",
                 old_value= old_type,
                 new_value= new_type
@@ -83,7 +83,7 @@ def _compare(old: str, new: str, path: str, changes: list):
             )
 
     elif isinstance(old, list):
-        for index, (old_item, new_item) in zip(old, new):
+        for index, (old_item, new_item) in enumerate(zip(old, new)):
             _compare(
                 old_item,
                 new_item,
@@ -91,24 +91,24 @@ def _compare(old: str, new: str, path: str, changes: list):
                 changes
             )
     
-    def json_compare(old: str, new: str) -> list:
-        old_path = Path(old)
-        new_path = Path(new)
+def json_compare(old: str, new: str) -> list:
+    old_path = Path(old)
+    new_path = Path(new)
 
-        with old_path.open(encoding="utf-8") as f:
-            old_data = json.load(f)
-        
-        with new_path.open(encoding="utf-8") as f:
-            new_data = json.load(f)
-        
-        changes = []
-        _compare(
-            old_data,
-            new_data,
-            "$",
-            changes
-        )
-        return changes
+    with old_path.open(encoding="utf-8") as f:
+        old_data = json.load(f)
+    
+    with new_path.open(encoding="utf-8") as f:
+        new_data = json.load(f)
+    
+    changes = []
+    _compare(
+        old_data,
+        new_data,
+        "$",
+        changes
+    )
+    return changes
 
 
 
