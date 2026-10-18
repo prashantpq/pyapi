@@ -18,7 +18,7 @@ It is useful for detecting changes in API response structures, checking compatib
 ## Installation
 
 ```bash
-pip install pyapi
+pip install pyapi-diff
 ```
 
 ## Quick Start
