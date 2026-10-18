@@ -20,8 +20,8 @@ def _json_type(value: any) -> any:
 
 def _compare(old: dict, new: dict, path: str, changes: list)-> list:
 
-    old_type = _json_type(old)
-    new_type = _json_type(new)
+    old_type: any = _json_type(old)
+    new_type: any = _json_type(new)
 
     if old_type != new_type:
         changes.append(
@@ -35,8 +35,8 @@ def _compare(old: dict, new: dict, path: str, changes: list)-> list:
         return
     
     if isinstance(old, dict):
-        old_keys = set(old)
-        new_keys = set(new)
+        old_keys: list = set(old)
+        new_keys: list = set(new)
 
         for key in sorted(old_keys - new_keys):
             changes.append(
@@ -74,16 +74,16 @@ def _compare(old: dict, new: dict, path: str, changes: list)-> list:
             )
     
 def json_compare(old: dict, new: dict) -> list:
-    old_path = Path(old)
-    new_path = Path(new)
+    old_path: str = Path(old)
+    new_path: str = Path(new)
 
     with old_path.open(encoding="utf-8") as f:
-        old_data = json.load(f)
+        old_data: dict = json.load(f)
     
     with new_path.open(encoding="utf-8") as f:
-        new_data = json.load(f)
+        new_data: dict = json.load(f)
     
-    changes = []
+    changes: list= []
     _compare(
         old_data,
         new_data,
