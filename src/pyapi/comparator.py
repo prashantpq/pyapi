@@ -2,15 +2,8 @@ from pyapi.models import Change
 from pathlib import Path
 import json
 
-def _json_type(value):
-    """
-    Docstring for _json_type
+def _json_type(value: any) -> any:
 
-    :param value: any datatype
-    :type value: Any
-    :return: understandable datatype
-    :rtype: Any
-    """
     if value is None:
         return "null"
     if isinstance(value, bool):
@@ -25,19 +18,8 @@ def _json_type(value):
         return "array"
     return "Unknown"
 
-def _compare(old: str, new: str, path: str, changes: list):
-    """
-    Docstring for _compare
-    
-    :param old: Description
-    :type old: str
-    :param new: Description
-    :type new: str
-    :param path: Description
-    :type path: str
-    :param changes: Description
-    :type changes: list
-    """
+def _compare(old: dict, new: dict, path: str, changes: list)-> list:
+
     old_type = _json_type(old)
     new_type = _json_type(new)
 
@@ -91,7 +73,7 @@ def _compare(old: str, new: str, path: str, changes: list):
                 changes
             )
     
-def json_compare(old: str, new: str) -> list:
+def json_compare(old: dict, new: dict) -> list:
     old_path = Path(old)
     new_path = Path(new)
 
