@@ -120,7 +120,7 @@ The change from `"Alice"` to `"Bob"` is ignored because the value remains a stri
 Clone the repository:
 
 ```bash
-git clone YOUR_REPOSITORY_URL
+git clone https://github.com/prashantpq/pyapi.git
 cd pyapi
 ```
 
