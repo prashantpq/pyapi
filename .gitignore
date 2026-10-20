@@ -1,2 +1,3 @@
 .venv
 deployement
+tests/test2.py

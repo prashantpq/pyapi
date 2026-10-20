@@ -1,6 +1,7 @@
 from pyapi.models import Change
 from pathlib import Path
 import json
+import sys
 
 def _json_type(value: any) -> any:
 
@@ -26,7 +27,7 @@ def _compare(old: dict, new: dict, path: str, changes: list)-> list:
     if old_type != new_type:
         changes.append(
             Change(
-                kind= "type_changed",
+                kind= "TYPE_CHANGED",
                 path= path or "$",
                 old_value= old_type,
                 new_value= new_type
@@ -41,7 +42,7 @@ def _compare(old: dict, new: dict, path: str, changes: list)-> list:
         for key in sorted(old_keys - new_keys):
             changes.append(
                 Change(
-                    kind="key_removed",
+                    kind="KEY_REMOVED",
                     path= f"{path}.{key}",
                     old_value=old[key]
                 )
@@ -50,7 +51,7 @@ def _compare(old: dict, new: dict, path: str, changes: list)-> list:
         for key in sorted(new_keys - old_keys):
             changes.append(
                 Change(
-                    kind= "key_added",
+                    kind= "KEY_ADDED",
                     path= f"{path}.{key}",
                     new_value= new[key]
                 )
@@ -91,7 +92,12 @@ def json_compare(old: dict, new: dict) -> list:
         changes
     )
 
-    return changes if not len(changes) == 0 else ["Both json are identical"]
+    if len(changes) != 0:
+        sys.stdout.write("\033[1;31m")
+        return changes 
+    else:
+        sys.stdout.write("\033[1;32m")
+        return ["Both json are identical"]
 
 
 
