@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pyapi-diff"
-version = "0.0.2"
+version = "0.0.3"
 description = "python tool to indentify breaking changes in apis."
 readme = "README.md"
 requires-python = ">=3.10"
