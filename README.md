@@ -1,8 +1,9 @@
-# pyapi
 
-**A lightweight Python library to detect structural changes in JSON data.**
+# pyapi-diff
 
-`pyapi` compares two JSON-compatible data structures and identifies changes in their structure and data types, without reporting ordinary value changes.
+**A lightweight Python library to detect and report changes between JSON structures.**
+
+`pyapi-diff` compares two JSON files and identifies structural, data type, and value changes.
 
 It is useful for detecting changes in API response structures, checking compatibility between API versions, and identifying unexpected changes in JSON data.
 
@@ -11,9 +12,12 @@ It is useful for detecting changes in API response structures, checking compatib
 - **Key Addition Detection** — Identifies keys present in the new structure but missing from the old structure.
 - **Key Removal Detection** — Identifies keys present in the old structure but missing from the new structure.
 - **Type Change Detection** — Detects when a value's data type changes between two structures.
-- **Nested Structure Comparison** — Detects structural changes within nested JSON objects.
-- **Value-Agnostic Comparison** — Ignores changes to values when their data types remain the same.
-- **Readable Change Paths** — Reports the location of each detected change using JSON-style paths.
+- **Value Change Detection** — Identifies changes in values when their data types remain the same.
+- **List Item Addition Detection** — Detects elements added to the end of JSON arrays.
+- **List Item Removal Detection** — Detects elements removed from the end of JSON arrays.
+- **Nested Structure Comparison** — Recursively detects changes within nested JSON objects and arrays.
+- **Readable Change Paths** — Reports the exact location of each detected change using JSON-style paths.
+- **Boolean and Number Distinction** — Correctly distinguishes boolean values from numeric values.
 
 ## Installation
 
@@ -23,10 +27,12 @@ pip install pyapi-diff
 
 ## Quick Start
 
-```python
-from pyapi import json_compare
+Create two JSON files: `old.json` and `new.json`.
 
-old = {
+**old.json**
+
+```json
+{
   "id": 101,
   "name": "abc",
   "age": 55,
@@ -36,8 +42,12 @@ old = {
   },
   "skills": ["Python", "SQL"]
 }
+```
 
-new = {
+**new.json**
+
+```json
+{
   "id": "101",
   "name": "xyz",
   "contact": 1234567890,
@@ -47,31 +57,46 @@ new = {
   },
   "skills": ["Python", "SQL"]
 }
+```
 
-json_compare(old, new)
+Compare the files using Python:
+
+```python
+from pyapi import json_compare
+
+changes = json_compare("old.json", "new.json")
+
+for change in changes:
+    print(change)
 ```
 
 ### Output
 
 ```text
-key_removed: $.age (old = 55, new = None)
-key_added: $.contact (old = None, new = 1234567890)
-type_changed: $.id (old = 'number', new = 'string')
+TYPE_CHANGED: $.id (old = 'number', new = 'string')
+KEY_REMOVED: $.age (old = 55, new = None)
+KEY_ADDED: $.contact (old = None, new = 1234567890)
+VALUE_CHANGED: $.address.city (old = 'san francisco', new = 'Seattle')
+VALUE_CHANGED: $.address.pincode (old = 12345, new = 1234)
+VALUE_CHANGED: $.name (old = 'abc', new = 'xyz')
 ```
 
 ## Detected Change Types
 
 | Change Type | Description |
 |---|---|
-| `key_added` | A key exists in the new structure but not in the old structure. |
-| `key_removed` | A key exists in the old structure but not in the new structure. |
-| `type_changed` | A value's data type differs between the old and new structures. |
+| `KEY_ADDED` | A key exists in the new structure but not in the old structure. |
+| `KEY_REMOVED` | A key exists in the old structure but not in the new structure. |
+| `TYPE_CHANGED` | A value's data type differs between the old and new structures. |
+| `VALUE_CHANGED` | A value changes while its data type remains the same. |
+| `LIST_ITEM_ADDED` | An element is added to the end of a list. |
+| `LIST_ITEM_REMOVED` | An element is removed from the end of a list. |
 
 ## How It Works
 
-`pyapi` compares an old JSON-compatible structure against a new one and reports structural differences.
+`pyapi-diff` compares an old JSON structure against a new one and reports detected differences.
 
-For example, consider these two objects:
+For example:
 
 **Old structure**
 
@@ -98,18 +123,17 @@ For example, consider these two objects:
 
 The detected changes include:
 
-- `type_changed` at `$.user.id`, because `id` changes from a number to a string.
-- `key_added` at `$.user.email`, because `email` is newly introduced.
-
-The change from `"Alice"` to `"Bob"` is ignored because the value remains a string.
+- `TYPE_CHANGED` at `$.user.id`, because `id` changes from a number to a string.
+- `KEY_ADDED` at `$.user.email`, because `email` is newly introduced.
+- `VALUE_CHANGED` at `$.user.name`, because `name` changes from `"Alice"` to `"Bob"`.
 
 ## Use Cases
 
-- **API Response Comparison:** Identify structural changes between responses from different API versions.
-- **Breaking Change Detection:** Find removed keys or changed data types that could break API consumers.
-- **Regression Testing:** Detect unexpected changes in JSON response structures during development.
-- **Data Validation:** Check whether incoming JSON data maintains the expected structure.
-- **Configuration Comparison:** Identify added or removed settings and changes in their data types.
+- **API Response Comparison** — Identify changes between responses from different API versions.
+- **Breaking Change Detection** — Find removed keys or changed data types that could break API consumers.
+- **Regression Testing** — Detect unexpected changes in JSON response structures during development.
+- **Data Validation** — Check whether incoming JSON data maintains the expected structure.
+- **Configuration Comparison** — Identify added, removed, or modified settings.
 
 ## Requirements
 
@@ -120,7 +144,7 @@ The change from `"Alice"` to `"Bob"` is ignored because the value remains a stri
 Clone the repository:
 
 ```bash
-git clone https://github.com/prashantpq/pyapi.git
+git clone YOUR_REPOSITORY_URL
 cd pyapi
 ```
 
@@ -130,17 +154,17 @@ Install dependencies using [uv](https://docs.astral.sh/uv/):
 uv sync
 ```
 
-Run the example or test script:
+Run tests:
 
 ```bash
-uv run python tests/test1.py
+uv run python -m pytest -v
 ```
 
 ## Project Status
 
-`pyapi` is currently in its initial release, `0.0.3`
+`pyapi-diff` is currently in its initial feature release, `0.1.0`.
 
-The current focus is on detecting JSON structural and data type changes. Additional functionality may be introduced in future releases.
+The library supports detecting JSON structural changes, data type changes, value changes, and list length changes. Additional functionality may be introduced in future releases.
 
 ## Contributing
 
