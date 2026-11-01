@@ -36,8 +36,8 @@ def _compare(old: dict, new: dict, path: str, changes: list)-> list:
         return
     
     if isinstance(old, dict):
-        old_keys: list = set(old)
-        new_keys: list = set(new)
+        old_keys: set = set(old)
+        new_keys: set = set(new)
 
         for key in sorted(old_keys - new_keys):
             changes.append(
@@ -73,6 +73,33 @@ def _compare(old: dict, new: dict, path: str, changes: list)-> list:
                 f"{path}[{index}]",
                 changes
             )
+        for index in range(len(old), len(new)):
+            changes.append(
+                Change(
+                    kind="LIST_ITEM_ADDED",
+                    path=f"{path}[{index}]",
+                    new_value=new[index]
+                )
+            )
+
+        for index in range(len(new), len(old)):
+            changes.append(
+                Change(
+                    kind="LIST_ITEM_REMOVED",
+                    path=f"{path}[{index}]",
+                    old_value=old[index]
+                )
+            )
+    
+    elif old != new:
+        changes.append(
+            Change(
+                kind= "VALUE_CHANGED",
+                path=path,
+                old_value=old,
+                new_value=new
+            )
+        )
     
 def json_compare(old: dict, new: dict) -> list:
     old_path: str = Path(old)

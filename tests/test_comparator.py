@@ -23,7 +23,7 @@ def run_comparison(tmp_path, old_data, new_data):
 
 def test_detects_removed_key(tmp_path):
     old = {"name": "Alice", "age": 55}
-    new = {"name": "Bob"}
+    new = {"name": "Alice"}
 
     changes = run_comparison(tmp_path, old, new)
 
@@ -35,7 +35,7 @@ def test_detects_removed_key(tmp_path):
 
 def test_detects_added_key(tmp_path):
     old = {"name": "Alice"}
-    new = {"name": "Bob", "contact": 1234567890}
+    new = {"name": "Alice", "contact": 1234567890}
 
     changes = run_comparison(tmp_path, old, new)
 
@@ -58,22 +58,43 @@ def test_detects_type_change(tmp_path):
     assert changes[0].new_value == "string"
 
 
-def test_ignores_string_value_change(tmp_path):
+def test_detects_string_value_change(tmp_path):
     old = {"name": "Alice"}
     new = {"name": "Bob"}
 
     changes = run_comparison(tmp_path, old, new)
 
-    assert changes == ["Both json are identical"]
+    assert len(changes) == 1
+    assert changes[0].kind == "VALUE_CHANGED"
+    assert changes[0].path == "$.name"
+    assert changes[0].old_value == "Alice"
+    assert changes[0].new_value == "Bob"
 
 
-def test_ignores_numeric_value_change(tmp_path):
+def test_detects_numeric_value_change(tmp_path):
     old = {"age": 25}
     new = {"age": 55}
 
     changes = run_comparison(tmp_path, old, new)
 
-    assert changes == ["Both json are identical"]
+    assert len(changes) == 1
+    assert changes[0].kind == "VALUE_CHANGED"
+    assert changes[0].path == "$.age"
+    assert changes[0].old_value == 25
+    assert changes[0].new_value == 55
+
+
+def test_detects_empty_string_value_change(tmp_path):
+    old = {"id": 101}
+    new = {"id": ""}
+
+    changes = run_comparison(tmp_path, old, new)
+
+    assert len(changes) == 1
+    assert changes[0].kind == "TYPE_CHANGED"
+    assert changes[0].path == "$.id"
+    assert changes[0].old_value == "number"
+    assert changes[0].new_value == "string"
 
 
 def test_detects_nested_added_key(tmp_path):
@@ -82,17 +103,49 @@ def test_detects_nested_added_key(tmp_path):
 
     changes = run_comparison(tmp_path, old, new)
 
+    assert len(changes) == 2
+
+    actual = {(change.kind, change.path) for change in changes}
+
+    assert actual == {
+        ("KEY_ADDED", "$.user.email"),
+        ("VALUE_CHANGED", "$.user.name"),
+    }
+
+
+def test_detects_nested_value_change(tmp_path):
+    old = {
+        "user": {
+            "address": {
+                "city": "Mumbai"
+            }
+        }
+    }
+
+    new = {
+        "user": {
+            "address": {
+                "city": "Pune"
+            }
+        }
+    }
+
+    changes = run_comparison(tmp_path, old, new)
+
     assert len(changes) == 1
-    assert changes[0].kind == "KEY_ADDED"
-    assert changes[0].path == "$.user.email"
+    assert changes[0].kind == "VALUE_CHANGED"
+    assert changes[0].path == "$.user.address.city"
+    assert changes[0].old_value == "Mumbai"
+    assert changes[0].new_value == "Pune"
 
 
-def test_detects_multiple_changes_and_ignores_value_changes(tmp_path):
+def test_detects_multiple_changes(tmp_path):
     old = {
         "id": 101,
         "age": 55,
         "name": "Alice",
     }
+
     new = {
         "id": "101",
         "name": "Bob",
@@ -104,13 +157,13 @@ def test_detects_multiple_changes_and_ignores_value_changes(tmp_path):
     actual = {(change.kind, change.path) for change in changes}
 
     expected = {
-        ("KEY_REMOVED", "$.age"),
-        ("KEY_ADDED", "$.contact"),
         ("TYPE_CHANGED", "$.id"),
+        ("KEY_REMOVED", "$.age"),
+        ("VALUE_CHANGED", "$.name"),
+        ("KEY_ADDED", "$.contact"),
     }
 
     assert actual == expected
-    assert ("key_removed", "$.name") not in actual
 
 
 def test_identical_json_structures(tmp_path):
@@ -138,6 +191,40 @@ def test_detects_type_change_inside_list(tmp_path):
     assert changes[0].new_value == "string"
 
 
+def test_detects_added_list_items(tmp_path):
+    old = {"skills": ["Python", "SQL"]}
+    new = {"skills": ["Python", "SQL", "Java", "C++"]}
+
+    changes = run_comparison(tmp_path, old, new)
+
+    assert len(changes) == 2
+
+    assert changes[0].kind == "LIST_ITEM_ADDED"
+    assert changes[0].path == "$.skills[2]"
+    assert changes[0].new_value == "Java"
+
+    assert changes[1].kind == "LIST_ITEM_ADDED"
+    assert changes[1].path == "$.skills[3]"
+    assert changes[1].new_value == "C++"
+
+
+def test_detects_removed_list_items(tmp_path):
+    old = {"skills": ["Python", "SQL", "Java", "C++"]}
+    new = {"skills": ["Python", "SQL"]}
+
+    changes = run_comparison(tmp_path, old, new)
+
+    assert len(changes) == 2
+
+    assert changes[0].kind == "LIST_ITEM_REMOVED"
+    assert changes[0].path == "$.skills[2]"
+    assert changes[0].old_value == "Java"
+
+    assert changes[1].kind == "LIST_ITEM_REMOVED"
+    assert changes[1].path == "$.skills[3]"
+    assert changes[1].old_value == "C++"
+
+
 def test_distinguishes_boolean_from_number(tmp_path):
     old = {"active": True}
     new = {"active": 1}
@@ -149,3 +236,21 @@ def test_distinguishes_boolean_from_number(tmp_path):
     assert changes[0].path == "$.active"
     assert changes[0].old_value == "boolean"
     assert changes[0].new_value == "number"
+
+
+def test_ignores_unchanged_values(tmp_path):
+    old = {
+        "name": "Alice",
+        "age": 25,
+        "skills": ["Python", "SQL"],
+    }
+
+    new = {
+        "name": "Alice",
+        "age": 25,
+        "skills": ["Python", "SQL"],
+    }
+
+    changes = run_comparison(tmp_path, old, new)
+
+    assert changes == ["Both json are identical"]
